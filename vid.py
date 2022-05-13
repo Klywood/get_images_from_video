@@ -12,6 +12,7 @@ Examples of using moduel:
 """
 
 import os
+import pathlib
 import cv2
 from numpy import linspace
 
@@ -66,6 +67,24 @@ def save_frame(frame, folder, file_name):
     cv2.imwrite(path, frame)
 
 
-if __name__ == '__main__':
+def rename_files_in_folder(path, from_type='mp4', to_type=None):
+    """Renames files in given folder to nums ascending"""
+    to_type = to_type if to_type else from_type
+    main_path = pathlib.Path(path)
 
-    slice_video("vid_60fps.mp4", 60)
+    for i, path in enumerate(main_path.glob(f'*.{from_type}')):
+        new_name = os.path.join(main_path, f"{i}.{to_type}")
+        try:
+            path.rename(new_name)
+        except FileExistsError:
+            print(f"File '{new_name}' already exists. Going to next")
+            continue
+
+
+if __name__ == '__main__':
+    #
+    rename_files_in_folder('videos', 'avi', 'avi')
+
+    for vid in sorted(os.listdir('videos'), key=lambda x: int(x[:x.find('.')])):
+        vid_path = os.path.join('videos', vid)
+        slice_video(vid_path, 16)
