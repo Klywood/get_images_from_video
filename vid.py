@@ -37,13 +37,16 @@ def slice_video(video, span=100, uniform=False, limit=5):
     cap = cv2.VideoCapture(video)
 
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    # print(total_frames)
     current_frame = 0
+
     while True:
         ret, frame = cap.read()
         if ret:
             #  saves the limit number of images taken uniformly from the entire video
             if uniform:
-                if current_frame in linspace(0, total_frames, limit, endpoint=False, dtype=int):
+                frames_to_save = linspace(0, total_frames, limit, endpoint=False, dtype=int)
+                if current_frame in frames_to_save:
                     save_frame(frame, folder_to_save, current_frame)
             #  else: every 'span' frame with limit on total saved frames count
             else:
@@ -82,9 +85,13 @@ def rename_files_in_folder(path, from_type='mp4', to_type=None):
 
 
 if __name__ == '__main__':
-    #
-    rename_files_in_folder('videos', 'avi', 'avi')
 
-    for vid in sorted(os.listdir('videos'), key=lambda x: int(x[:x.find('.')])):
+    # rename_files_in_folder('videos', 'avi', 'avi')
+
+    sorted_vids = sorted(os.listdir('videos'), key=lambda x: int(x[:x.find('.')]))
+    count = 0
+    for vid in sorted_vids:
+        count += 1
         vid_path = os.path.join('videos', vid)
-        slice_video(vid_path, 16)
+        slice_video(vid_path, 30)
+        print(f"{count} of {len(sorted_vids)} videos done")
