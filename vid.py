@@ -16,38 +16,44 @@ import cv2
 from numpy import linspace
 
 
-def slice_video(video, span=100, uniform=False, limit=5):
+def slice_video(video, frame_interval: int = None, uniform_frames: int = None):
     """Saves frames as images from video
 
-    As default: saves every 'span' frame from entire video
+    You should choose 1 type of slicing:
+        'frame_interval' parameter allows you to save each specified frame
+        'uniform_frames' allows you to save the specified number of frames evenly distributed across the video
 
-    If uniform=True - saves the 'limit' number (5 as default)
-    of images taken uniformly from the entire video
 
     :param video: path to video file
-    :param span: interval between frames that will be saved
-    :param uniform: if True - saves the limit number of images taken uniformly from the entire video
-    :param limit: (use if uniform=True) - the maximum number of saved frames (no limit as default)
+    :param frame_interval: interval between frames that will be saved
+    :param uniform_frames: if True - saves the specified number of images taken uniformly from the entire video
     """
     #  create folder to save images
-    folder_to_save = f'frames_{video}'
-    os.makedirs(folder_to_save, exist_ok=True)
+    default_folder = f'every_{frame_interval}_frame_{video}'
+    uniform_folder = f'uniformly_{uniform_frames}_frames_{video}'
+    if frame_interval and not uniform_frames:
+        os.makedirs(default_folder, exist_ok=True)
+    elif uniform_frames and not frame_interval:
+        os.makedirs(uniform_folder, exist_ok=True)
+    else:
+        raise AttributeError("Set only one attribute - how video should be sliced")
     #  open video
     cap = cv2.VideoCapture(video)
 
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    print(f'There are {total_frames} frames in video')
     current_frame = 0
     while True:
         ret, frame = cap.read()
         if ret:
             #  saves the limit number of images taken uniformly from the entire video
-            if uniform:
-                if current_frame in linspace(0, total_frames, limit, endpoint=False, dtype=int):
-                    save_frame(frame, folder_to_save, current_frame)
+            if uniform_frames:
+                if current_frame in linspace(0, total_frames, uniform_frames, endpoint=False, dtype=int):
+                    save_frame(frame, uniform_folder, current_frame)
             #  else: every 'span' frame with limit on total saved frames count
             else:
-                if current_frame % span == 0:
-                    save_frame(frame, folder_to_save, current_frame)
+                if current_frame % frame_interval == 0:
+                    save_frame(frame, default_folder, current_frame)
             current_frame += 1
         else:
             break
@@ -67,5 +73,4 @@ def save_frame(frame, folder, file_name):
 
 
 if __name__ == '__main__':
-
-    slice_video("vid_60fps.mp4", 60)
+    slice_video("1.mp4", uniform_frames=2)
