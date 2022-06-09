@@ -89,5 +89,4 @@ def rename_files_in_folder(path, from_type='mp4', to_type=None):
 
 
 if __name__ == '__main__':
-
-    slice_video("vid_60fps.mp4", 60)
+    slice_video("vid_60fps.mp4", frame_interval=60)
